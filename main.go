@@ -11,9 +11,12 @@ import (
 	tu "github.com/mymmrac/telego/telegoutil"
 )
 
+var userStates = make(map[int64]string)
+
+
 func main() {
 
-	apiToken := os.Getenv("TELEGRAM_API_TOKEN")
+	apiToken := "7454612950:AAG4JNWCOb8fKItD1Pdt9fjxgi2B2kcpCxs"
        if apiToken == "" {
            log.Fatal("API Token not set")
        }
@@ -35,6 +38,14 @@ func main() {
 		//Обработчик /start
 		chatID := tu.ID(update.Message.Chat.ID)
 
+		photo := tu.Photo(
+			chatID,
+			tu.File(mustOpen("hrlxlog.jpg")),
+		).WithCaption(			"Привет🤝\nHrlxLogistics - лучший вариант для заказа\nс китайских площадок, таких как: Poizon,\n1688, taobao и др.\nУ нас самая выгодная цена!\nБыстрая доставка\n\nℹ️Этот бот поможет быстро рассчитать стоимость вещи.\n\n✅ @hrlxLogisticsss - пишите сюда для\nоформления заказа, либо если остались\nинтересующие вопросы. С радостью со\nвсем подскажем 😉",
+	)
+
+		_, _ = bot.SendPhoto(photo)
+
 
 		keyboard := tu.Keyboard(
 			tu.KeyboardRow(
@@ -51,8 +62,8 @@ func main() {
 
 		message := tu.Message(
 			chatID, 
-			"Привет🤝\nHrlxLogistics - лучший вариант для заказа\nс китайских площадок, таких как: Poizon,\n1688, taobao и др.\nУ нас самая выгодная цена!\nБыстрая доставка\n\nℹ️Этот бот поможет быстро рассчитать стоимость вещи.\n\n✅ @hrlxLogisticsss - пишите сюда для\nоформления заказа, либо если остались\nинтересующие вопросы. С радостью со\nвсем подскажем 😉",
-		).WithReplyMarkup(keyboard)
+			"",
+			).WithReplyMarkup(keyboard)
 
 		_, _= bot.SendMessage(message)
 
@@ -64,6 +75,14 @@ func main() {
 		//Обработчик назад
 		chatID := tu.ID(update.Message.Chat.ID)
 
+		photo := tu.Photo(
+			chatID,
+			tu.File(mustOpen("hrlxlog.jpg")),
+		).WithCaption(			"Привет🤝\nHrlxLogistics - лучший вариант для заказа\nс китайских площадок, таких как: Poizon,\n1688, taobao и др.\nУ нас самая выгодная цена!\nБыстрая доставка\n\nℹ️Этот бот поможет быстро рассчитать стоимость вещи.\n\n✅ @hrlxLogisticsss - пишите сюда для\nоформления заказа, либо если остались\nинтересующие вопросы. С радостью со\nвсем подскажем 😉",
+	)
+
+		_, _ = bot.SendPhoto(photo)
+
 
 		keyboard := tu.Keyboard(
 			tu.KeyboardRow(
@@ -80,16 +99,23 @@ func main() {
 
 		message := tu.Message(
 			chatID, 
-			"Привет🤝\nHrlxLogistics - лучший вариант для заказа\nс китайских площадок, таких как: Poizon,\n1688, taobao и др.\nУ нас самая выгодная цена!\nБыстрая доставка\n\nℹ️Этот бот поможет быстро рассчитать стоимость вещи.\n\n✅ @hrlxLogisticsss - пишите сюда для\nоформления заказа, либо если остались\nинтересующие вопросы. С радостью со\nвсем подскажем 😉",
-		).WithReplyMarkup(keyboard)
+			"",
+			).WithReplyMarkup(keyboard)
 
 		_, _= bot.SendMessage(message)
-
 	}, th.TextEqual("🔙 Назад"))
+
+
+
+
+	
 	
 	bh.Handle(func(bot *telego.Bot, update telego.Update) {
 		//Обработчик стоимости
 		chatID := tu.ID(update.Message.Chat.ID)
+
+		userStates[update.Message.Chat.ID] = "awaitingPrice"
+
 
 		backButton := tu.Keyboard(
 			tu.KeyboardRow(
@@ -110,6 +136,16 @@ func main() {
 		// обработчик расчета цены
 		chatID := tu.ID(update.Message.Chat.ID)
 
+
+		// Check if the user is in the correct state
+		if userStates[update.Message.Chat.ID] != "awaitingPrice" {
+			// Ignore message if state is not set to awaitingPrice
+			return
+		}
+
+		// Clear the state after processing the request
+		delete(userStates, update.Message.Chat.ID)
+		
 		text := update.Message.Text
 		price, err := strconv.Atoi(text)
 		if err != nil {
@@ -221,3 +257,12 @@ func main() {
 
 
 
+
+
+func mustOpen(filename string) *os.File {
+	file, err := os.Open(filename)
+	if err != nil {
+		panic(err)
+	}
+	return file
+}
