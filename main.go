@@ -16,7 +16,7 @@ var userStates = make(map[int64]string)
 
 func main() {
 
-	apiToken := "7454612950:AAG4JNWCOb8fKItD1Pdt9fjxgi2B2kcpCxs"
+	apiToken := "BOT-TOKEN"
        if apiToken == "" {
            log.Fatal("API Token not set")
        }
